@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 //Created by squidoodly
 
-import meteordevelopment.DiscordIPC;
-import meteordevelopment.RichPresence;
+import meteordevelopment.discordipc.DiscordIPC;
+import meteordevelopment.discordipc.RichPresence;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -201,7 +201,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)));
+                        rpc.setDetails(String.valueOf(MeteorStarscript.ss.run(line1Scripts.get(i))));
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }
@@ -221,7 +221,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)));
+                        rpc.setState(String.valueOf(MeteorStarscript.ss.run(line2Scripts.get(i))));
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }

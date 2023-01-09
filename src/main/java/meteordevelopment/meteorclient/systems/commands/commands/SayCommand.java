@@ -37,7 +37,7 @@ public class SayCommand extends Command {
                 Script script = Compiler.compile(result);
 
                 try {
-                    String message = MeteorStarscript.ss.run(script);
+                    String message = String.valueOf(MeteorStarscript.ss.run(script));
                     mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(message));
                 } catch (StarscriptError e) {
                     MeteorStarscript.printChatError(e);
