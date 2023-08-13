@@ -36,3 +36,8 @@ jobs:
 
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
+      - name: Upload meteor-client
+        uses: actions/upload-artifact@v3
+        with:
+          name: meteor-client
+          path: build/libs/*.jar
