@@ -208,7 +208,7 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
+    private static final Pattern antiSpamRegex = Pattern.compile(" \\(([0-9]+)\\)$");
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
 
     private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
@@ -229,8 +229,9 @@ public class BetterChat extends Module {
         Text message = event.getMessage();
 
         if (filterRegex.get()) {
+            String messageString = message.getString();
             for (Pattern pattern : filterRegexList) {
-                if (pattern.matcher(message.getString()).find()) {
+                if (pattern.matcher(messageString).find()) {
                     event.cancel();
                     return;
                 }
@@ -250,12 +251,9 @@ public class BetterChat extends Module {
         }
 
         if (timestamps.get()) {
-            Matcher matcher = timestampRegex.matcher(message.getString());
-            if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
-
             Text timestamp = Text.literal("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
 
-            message = Text.literal("").append(timestamp).append(message);
+            message = Text.empty().append(timestamp).append(message);
         }
 
         event.setMessage(message);
@@ -263,6 +261,7 @@ public class BetterChat extends Module {
 
 
     private Text appendAntiSpam(Text text) {
+        String textString = text.getString();
         Text returnText = null;
         int messageIndex = -1;
 
@@ -270,28 +269,25 @@ public class BetterChat extends Module {
         if (messages.isEmpty()) return null;
 
         for (int i = 0; i < Math.min(antiSpamDepth.get(), messages.size()); i++) {
-            String stringToCheck = messages.get(i).content().copy().getString();
+            String stringToCheck = messages.get(i).content().getString();
 
             Matcher timestampMatcher = timestampRegex.matcher(stringToCheck);
             if (timestampMatcher.find()) {
                 stringToCheck = stringToCheck.substring(8);
             }
 
-            if (text.getString().equals(stringToCheck)) {
+            if (textString.equals(stringToCheck)) {
                 messageIndex = i;
                 returnText = text.copy().append(Text.literal(" (2)").formatted(Formatting.GRAY));
                 break;
-            }
-            else {
+            } else {
                 Matcher matcher = antiSpamRegex.matcher(stringToCheck);
-                if (!matcher.matches() && !matcher.find()) continue;
+                if (!matcher.find()) continue;
 
                 String group = matcher.group(matcher.groupCount());
-                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+                int number = Integer.parseInt(group);
 
-                String counter = " (" + number + ")";
-
-                if (stringToCheck.substring(0, stringToCheck.length() - counter.length()).equals(text.getString())) {
+                if (stringToCheck.substring(0, matcher.start()).equals(textString)) {
                     messageIndex = i;
                     returnText = text.copy().append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
                     break;
@@ -304,17 +300,17 @@ public class BetterChat extends Module {
 
             int start = -1;
             for (int i = 0; i < messageIndex; i++) {
-                start += lines.get(i);
+                start += lines.getInt(i);
             }
 
-            int i = lines.get(messageIndex);
+            int i = lines.getInt(messageIndex);
             while (i > 0) {
                 visible.remove(start + 1);
                 i--;
             }
 
             messages.remove(messageIndex);
-            lines.remove(messageIndex);
+            lines.removeInt(messageIndex);
         }
 
         return returnText;
